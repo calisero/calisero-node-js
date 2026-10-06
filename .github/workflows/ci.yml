@@ -1,0 +1,237 @@
+name: CI
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+  release:
+    types: [ published ]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  quality:
+    name: Lint & Types
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Lint and formatting (Biome)
+        run: npm run lint
+
+      - name: Type check (TypeScript, strict)
+        run: npm run typecheck
+
+  test:
+    name: Tests (Node.js ${{ matrix.node-version }})
+    runs-on: ubuntu-latest
+
+    strategy:
+      fail-fast: false
+      matrix:
+        node-version: [ 20, 22, 24, 26 ]
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run tests
+        if: matrix.node-version != 24
+        run: npm test
+
+      # Coverage is collected once; the thresholds in vitest.config.ts fail the run below them
+      - name: Run tests with coverage
+        if: matrix.node-version == 24
+        run: npm run test:coverage
+
+      - name: Build
+        run: npm run build
+
+      # The built package, loaded by its name with import and with require()
+      - name: Smoke test the package (ESM and CommonJS)
+        run: npm run smoke
+
+      - name: Upload coverage report
+        if: matrix.node-version == 24
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-report
+          path: coverage/
+          retention-days: 30
+
+      # Needs the repository enabled on codecov.io; never fails the build
+      - name: Upload coverage to Codecov
+        if: matrix.node-version == 24
+        uses: codecov/codecov-action@v5
+        continue-on-error: true
+        with:
+          files: coverage/lcov.info
+          fail_ci_if_error: false
+        env:
+          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
+
+  os:
+    name: Tests (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ windows-latest, macos-latest ]
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run tests
+        run: npm test
+
+  package:
+    name: Package & Examples
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build
+        run: npm run build
+
+      - name: Check the examples (syntax and types against the built package)
+        run: npm run examples:check
+
+      # The type declarations resolve for ESM and bundler consumers; CommonJS code loads
+      # the package with require(), which the smoke tests check on every Node.js version
+      - name: Check the type declarations (Are The Types Wrong?)
+        run: npx --yes @arethetypeswrong/cli@0.18.5 --pack . --profile esm-only
+
+      - name: Check the package contents
+        run: |
+          npm pack --dry-run --json > pack.json
+          node -e "
+            const [pack] = require('./pack.json');
+            const files = pack.files.map((file) => file.path);
+            const required = ['package.json', 'README.md', 'LICENSE.md', 'CHANGELOG.md', 'dist/index.js', 'dist/index.d.ts'];
+            const missing = required.filter((file) => !files.includes(file));
+            const unexpected = files.filter((file) => /^(tests|examples|scripts|coverage|resources)\//.test(file));
+            if (missing.length || unexpected.length) {
+              console.error('Missing:', missing, 'Unexpected:', unexpected);
+              process.exit(1);
+            }
+            console.log(pack.name + '@' + pack.version + ': ' + files.length + ' files, ' + pack.size + ' bytes');
+          "
+
+  security:
+    name: Security Audit
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      # The library has no runtime dependency: this must stay clean
+      - name: Audit runtime dependencies
+        run: npm audit --omit=dev
+
+      - name: Verify the registry signatures of the dependencies
+        run: npm audit signatures
+
+      - name: Audit development dependencies
+        run: npm audit --audit-level=high
+        continue-on-error: true
+
+  qa:
+    name: Quality Assurance
+    runs-on: ubuntu-latest
+    needs: [ quality, test, os, package, security ]
+
+    steps:
+      - name: Success notification
+        run: echo "✅ All quality assurance checks passed!"
+
+  publish:
+    name: Publish to npm
+    runs-on: ubuntu-latest
+    needs: [ qa ]
+    if: github.event_name == 'release'
+
+    permissions:
+      contents: read
+      id-token: write
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          registry-url: https://registry.npmjs.org
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Check the release tag matches the package version
+        run: |
+          VERSION="$(node -p "require('./package.json').version")"
+          test "${GITHUB_REF_NAME#v}" = "$VERSION" || { echo "Tag ${GITHUB_REF_NAME} does not match version ${VERSION}"; exit 1; }
+
+      # prepublishOnly runs the whole QA suite once more before publishing
+      - name: Publish with provenance
+        run: npm publish --provenance --access public
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}

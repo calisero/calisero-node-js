@@ -1,0 +1,73 @@
+{
+    "name": "@calisero/calisero-node",
+    "version": "1.0.0",
+    "description": "Official Node.js library for the Calisero SMS API",
+    "keywords": [
+        "calisero",
+        "sms",
+        "otp",
+        "2fa",
+        "verification",
+        "transactional-sms",
+        "api",
+        "sdk"
+    ],
+    "homepage": "https://github.com/calisero/calisero-node#readme",
+    "bugs": {
+        "url": "https://github.com/calisero/calisero-node/issues",
+        "email": "support@calisero.ro"
+    },
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/calisero/calisero-node.git"
+    },
+    "license": "MIT",
+    "author": {
+        "name": "Calisero",
+        "email": "support@calisero.ro",
+        "url": "https://calisero.ro"
+    },
+    "type": "module",
+    "exports": {
+        ".": {
+            "types": "./dist/index.d.ts",
+            "default": "./dist/index.js"
+        },
+        "./package.json": "./package.json"
+    },
+    "main": "./dist/index.js",
+    "types": "./dist/index.d.ts",
+    "files": [
+        "dist",
+        "src",
+        "CHANGELOG.md"
+    ],
+    "sideEffects": false,
+    "engines": {
+        "node": ">=20.19.0"
+    },
+    "scripts": {
+        "clean": "node -e \"require('node:fs').rmSync('dist', { recursive: true, force: true })\"",
+        "build": "npm run clean && tsc -p tsconfig.build.json",
+        "typecheck": "tsc -p tsconfig.json",
+        "lint": "biome check .",
+        "format": "biome check --write .",
+        "test": "vitest run",
+        "test:watch": "vitest",
+        "test:coverage": "vitest run --coverage",
+        "smoke": "node scripts/smoke-esm.mjs && node scripts/smoke-cjs.cjs",
+        "examples:check": "node scripts/check-examples.mjs",
+        "qa": "npm run lint && npm run typecheck && npm run test && npm run build && npm run smoke && npm run examples:check",
+        "prepublishOnly": "npm run qa"
+    },
+    "devDependencies": {
+        "@biomejs/biome": "^2.5.15",
+        "@types/node": "^20.19.0",
+        "@vitest/coverage-v8": "^4.1.0",
+        "typescript": "^7.0.2",
+        "vitest": "^4.1.0"
+    },
+    "publishConfig": {
+        "access": "public"
+    }
+}

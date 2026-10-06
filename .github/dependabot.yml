@@ -1,0 +1,23 @@
+version: 2
+
+updates:
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: weekly
+    groups:
+      dev-dependencies:
+        dependency-type: development
+    # Vitest 5 drops Node.js 20, which the library still supports
+    ignore:
+      - dependency-name: vitest
+        update-types: [ version-update:semver-major ]
+      - dependency-name: '@vitest/coverage-v8'
+        update-types: [ version-update:semver-major ]
+      - dependency-name: '@types/node'
+        update-types: [ version-update:semver-major ]
+
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly

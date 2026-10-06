@@ -1,0 +1,37 @@
+# Dependencies
+/node_modules/
+
+# Build artifacts
+/dist/
+*.tsbuildinfo
+
+# Coverage reports
+/coverage/
+
+# IDE files
+/.idea/
+/.vscode/
+*.swp
+*.swo
+*~
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Local configuration
+.env
+.env.local
+.env.*.local
+
+# npm
+*.tgz
+.npm/
+
+# Temporary files
+/tmp/
+*.tmp
+*.log
+
+# Automation
+/automation/
