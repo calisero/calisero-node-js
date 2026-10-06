@@ -7,7 +7,7 @@ Thank you for considering contributing to the Calisero Node.js SMS API library! 
 You need Node.js 20.19 or later (the version in `.nvmrc` is the one CI checks the code style with).
 
 1. Fork the repository
-2. Clone your fork: `git clone https://github.com/your-username/calisero-node.git`
+2. Clone your fork: `git clone https://github.com/your-username/calisero-node-js.git`
 3. Install dependencies: `npm ci`
 4. Create a new branch: `git checkout -b feature/your-feature-name`
 
@@ -61,14 +61,35 @@ No test may reach the network: services run against a stub transport, the HTTP l
 
 ## Releasing
 
+The package is published to [npm](https://www.npmjs.com/package/@calisero/calisero-node) (Packagist is for PHP
+packages only).
+
 1. Set the new version in `package.json` and in `src/version.ts` (sent in the `User-Agent` header): a test checks
    that both match the latest version of CHANGELOG.md
 2. Move the changes from `[Unreleased]` to the new version in CHANGELOG.md
 3. Merge, then publish a GitHub release whose tag is the version (`v1.2.3` or `1.2.3`)
 
-The `publish` job of the CI workflow then runs every check again and publishes the package to npm with provenance.
-It authenticates with npm's trusted publishing (configure the repository on npmjs.com), or with an `NPM_TOKEN`
-repository secret.
+The `publish` job of the CI workflow then runs every check again and publishes the package to npm with provenance,
+which links each version on npmjs.com to the commit and the workflow run that built it.
+
+### Publishing Setup
+
+The first version needs a token, since npm's trusted publishing can only be configured for a package that exists:
+
+1. On npmjs.com, create the `calisero` organization, which owns the `@calisero` scope
+2. Create a granular access token with read and write access to the `@calisero` packages and "bypass two-factor
+   authentication" enabled, and save it as the `NPM_TOKEN` secret of the GitHub repository
+3. Publish the GitHub release of the first version: CI publishes it with that token
+
+Then switch to trusted publishing (OIDC), so that no token is stored at all:
+
+1. On npmjs.com, open the package's Settings → Trusted publishing and add a GitHub Actions publisher: organization
+   `calisero`, repository `calisero-node-js`, workflow filename `ci.yml`, and allow `npm publish`
+2. Delete the `NPM_TOKEN` secret and the token, and optionally require two-factor authentication and disallow tokens
+   under Settings → Publishing access
+
+Publishing with provenance needs the repository to be public and `repository.url` in `package.json` to name it
+exactly.
 
 ## Code Style
 

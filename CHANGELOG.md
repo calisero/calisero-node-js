@@ -6,6 +6,17 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ## [Unreleased]
 
+## [1.0.1] - 2026-10-06
+
+The first version published to npm: the publish job of 1.0.0 failed, so 1.0.0 exists only as a GitHub release. The library's code and API are unchanged; only the version in the `User-Agent` header moves to 1.0.1.
+
+### Fixed
+- **Publishing to npm.** The `repository`, `homepage` and `bugs` fields of `package.json` named `calisero/calisero-node` instead of the library's repository, `calisero/calisero-node-js`. npm publishes with provenance only a package whose `repository.url` matches the repository the publish workflow runs in. They now name `calisero/calisero-node-js`.
+- `README.md`: the CI and coverage badges, the `git clone` command and the issues link pointed to the same wrong repository; so did the `git clone` command of `CONTRIBUTING.md`.
+
+### Documentation
+- `CONTRIBUTING.md`: a new "Publishing Setup" section. The first version goes out with a granular access token saved as the `NPM_TOKEN` secret; then npm's trusted publishing (OIDC) for the `ci.yml` workflow of `calisero/calisero-node-js` replaces the token.
+
 ## [1.0.0] - 2026-10-05
 
 First release of the official Node.js library for the Calisero SMS API, covering version 1.0.14 of the API: the same API surface as `calisero/calisero-php` 2.3.0, with a Promise-based, fully typed interface.

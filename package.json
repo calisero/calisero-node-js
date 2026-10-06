@@ -1,6 +1,6 @@
 {
     "name": "@calisero/calisero-node",
-    "version": "1.0.0",
+    "version": "1.0.1",
     "description": "Official Node.js library for the Calisero SMS API",
     "keywords": [
         "calisero",
@@ -12,14 +12,14 @@
         "api",
         "sdk"
     ],
-    "homepage": "https://github.com/calisero/calisero-node#readme",
+    "homepage": "https://github.com/calisero/calisero-node-js#readme",
     "bugs": {
-        "url": "https://github.com/calisero/calisero-node/issues",
+        "url": "https://github.com/calisero/calisero-node-js/issues",
         "email": "support@calisero.ro"
     },
     "repository": {
         "type": "git",
-        "url": "git+https://github.com/calisero/calisero-node.git"
+        "url": "git+https://github.com/calisero/calisero-node-js.git"
     },
     "license": "MIT",
     "author": {

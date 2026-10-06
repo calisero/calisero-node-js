@@ -1,8 +1,8 @@
 # Calisero Node.js SMS API Library
 
 [![npm version](https://img.shields.io/npm/v/@calisero/calisero-node.svg?style=flat-square)](https://www.npmjs.com/package/@calisero/calisero-node)
-[![CI](https://img.shields.io/github/actions/workflow/status/calisero/calisero-node/ci.yml?branch=main&label=tests&style=flat-square)](https://github.com/calisero/calisero-node/actions/workflows/ci.yml)
-[![Coverage](https://img.shields.io/codecov/c/github/calisero/calisero-node?style=flat-square)](https://codecov.io/gh/calisero/calisero-node)
+[![CI](https://img.shields.io/github/actions/workflow/status/calisero/calisero-node-js/ci.yml?branch=main&label=tests&style=flat-square)](https://github.com/calisero/calisero-node-js/actions/workflows/ci.yml)
+[![Coverage](https://img.shields.io/codecov/c/github/calisero/calisero-node-js?style=flat-square)](https://codecov.io/gh/calisero/calisero-node-js)
 [![Node.js](https://img.shields.io/node/v/@calisero/calisero-node.svg?style=flat-square)](https://nodejs.org)
 [![TypeScript](https://img.shields.io/badge/TypeScript-strict-3178c6.svg?style=flat-square)](https://www.typescriptlang.org)
 [![Types](https://img.shields.io/npm/types/@calisero/calisero-node.svg?style=flat-square)](https://www.npmjs.com/package/@calisero/calisero-node)
@@ -263,8 +263,8 @@ This library includes runnable examples for every operation in the [`examples/`]
 ### 🚀 Running Examples
 
 ```bash
-git clone https://github.com/calisero/calisero-node.git
-cd calisero-node
+git clone https://github.com/calisero/calisero-node-js.git
+cd calisero-node-js
 npm ci && npm run build
 CALISERO_API_KEY=your-api-key-here CALISERO_TEST_PHONE=+40742123456 node examples/messages/send_simple_sms.mjs
 ```
@@ -724,7 +724,7 @@ Every request names the library and its version, then the runtime, so Calisero c
 which version sent them:
 
 ```
-User-Agent: Calisero-SMS-Node/1.0.0 (Node.js v24.21.0; linux x64)
+User-Agent: Calisero-SMS-Node/1.0.1 (Node.js v24.21.0; linux x64)
 ```
 
 A request whose `User-Agent` starts with `Calisero-SMS-Node/` comes from this library. Give your application's name
@@ -734,7 +734,7 @@ with `appInfo` and it follows, so the requests of each of your applications can 
 const client = SmsClient.create(process.env.CALISERO_API_KEY, { appInfo: { name: 'MyShop', version: '2.1.0' } });
 
 console.log(client.httpClient.userAgent);
-// Calisero-SMS-Node/1.0.0 (Node.js v24.21.0; linux x64) MyShop/2.1.0
+// Calisero-SMS-Node/1.0.1 (Node.js v24.21.0; linux x64) MyShop/2.1.0
 ```
 
 Characters a header does not allow (spaces, diacritics…) become `-` in the name and the version.
@@ -889,7 +889,7 @@ This library is open-sourced software licensed under the [MIT license](LICENSE.m
 
 - 📧 Email: support@calisero.ro
 - 📖 Documentation: [https://docs.calisero.ro](https://docs.calisero.ro)
-- 🐛 Issues: [GitHub Issues](https://github.com/calisero/calisero-node/issues)
+- 🐛 Issues: [GitHub Issues](https://github.com/calisero/calisero-node-js/issues)
 
 ## Changelog
 
