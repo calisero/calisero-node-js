@@ -4,7 +4,7 @@ The library's tests live in `tests/` and run with [Vitest](https://vitest.dev). 
 the services run against a stub transport, and the HTTP layer and the webhook handler against a local HTTP server
 the tests start on `127.0.0.1`.
 
-As of 1.0.1 the suite has **390 tests in 22 files** and covers 100% of the lines, statements, functions and branches
+As of 1.0.2 the suite has **390 tests in 22 files** and covers 100% of the lines, statements, functions and branches
 of `src/`. CI fails below the thresholds set in `vitest.config.ts` (98% of the lines, statements and functions, 95% of
 the branches).
 

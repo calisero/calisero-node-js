@@ -55,8 +55,10 @@ interface Operation {
     readonly operationId: string;
     readonly parameters?: { name: string; in: string }[];
     readonly requestBody?: { content: Record<string, MediaType> };
-    // The delivery webhook, which Calisero sends rather than answers, documents none
     readonly responses?: Record<string, ResponseObject>;
+    // The requests Calisero sends because of the call, the delivery webhook among them:
+    // by callback name, then runtime expression, then method
+    readonly callbacks?: Record<string, Record<string, Record<string, Operation>>>;
 }
 
 interface OpenApi {
@@ -167,15 +169,14 @@ const calls: Record<string, { readonly call: (client: SmsClient) => Promise<unkn
     validateVerificationPost: { call: (client) => client.verifications.validate({ phone: PHONE, code: 'SBMH0f' }) },
 };
 
-const operations = Object.entries(spec.paths)
-    .filter(([path]) => path.startsWith('/'))
-    .flatMap(([path, methods]) =>
-        Object.entries(methods).map(([method, operation]) => ({ path, method: method.toUpperCase(), operation })),
-    );
+// The delivery webhook, which Calisero sends rather than answers, is a callback of POST /messages, not one of these
+const operations = Object.entries(spec.paths).flatMap(([path, methods]) =>
+    Object.entries(methods).map(([method, operation]) => ({ path, method: method.toUpperCase(), operation })),
+);
 
 describe('the OpenAPI document', () => {
     it('is the version this SDK was built for', () => {
-        expect(spec.info.version).toMatch(/^1\.0\.14\b/);
+        expect(spec.info.version).toMatch(/^1\.0\.15\b/);
         expect(spec.servers[0]?.url).toBe('https://rest.calisero.ro/api/v1');
     });
 
@@ -259,7 +260,8 @@ describe('documented resources', () => {
     });
 
     it('delivery webhook: the documented payload is read, every field of it', () => {
-        const webhook = spec.paths['https://yoursite.com/your-callback-url']?.post;
+        const webhook =
+            spec.paths['/messages']?.post?.callbacks?.deliveryStatus?.['{$request.body#/callback_url}']?.post;
         const example = webhook?.requestBody?.content['application/json']?.example as Record<string, unknown>;
         const message = DeliveryWebhookMessage.fromObject(example);
 
