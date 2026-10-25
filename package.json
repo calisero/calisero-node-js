@@ -1,6 +1,6 @@
 {
     "name": "@calisero/calisero-node",
-    "version": "1.0.1",
+    "version": "1.0.2",
     "description": "Official Node.js library for the Calisero SMS API",
     "keywords": [
         "calisero",
@@ -40,7 +40,8 @@
     "files": [
         "dist",
         "src",
-        "CHANGELOG.md"
+        "CHANGELOG.md",
+        "AGENTS.md"
     ],
     "sideEffects": false,
     "engines": {

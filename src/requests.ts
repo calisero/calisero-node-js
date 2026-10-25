@@ -34,13 +34,16 @@ export interface CreateMessageRequest {
     readonly scheduleAt?: Date | string | null | undefined;
 
     /**
-     * The URL Calisero posts the message's delivery status updates to.
+     * The URL Calisero posts the message's delivery status updates to: an http or
+     * https address on the public Internet. Private, loopback and link-local
+     * addresses are refused, and redirects are not followed.
      */
     readonly callbackUrl?: string | null | undefined;
 
     /**
-     * One of the account's approved sender IDs, exactly as approved; the default
-     * sender when omitted.
+     * One of the account's approved sender IDs, exactly as approved (the match is
+     * case-sensitive); the default sender when omitted. A sender that is unknown or
+     * not approved yet is refused with a `ValidationError` and nothing is sent.
      */
     readonly sender?: string | null | undefined;
 
@@ -92,12 +95,15 @@ export interface CreateVerificationRequest {
 
     /**
      * The brand named in the default message, at most 120 characters: required
-     * unless a `template` is given.
+     * unless a `template` is given. It may not contain links (web addresses,
+     * domains, emails or IP addresses).
      */
     readonly brand?: string | null | undefined;
 
     /**
-     * A custom message, at most 600 characters, that must hold `{code}`.
+     * A custom message, at most 600 characters, that must hold `{code}`. It may not
+     * contain links (web addresses, domains, emails or IP addresses): the code is
+     * sent from a shared sender.
      */
     readonly template?: string | null | undefined;
 

@@ -304,9 +304,13 @@ console.log(response.responseMeta.dailyRemaining); // Messages left today (null:
 | `visibleBody` | `string` | Shown instead of `body` in the API's answers and the dashboard |
 | `validity` | `number` | Validity period, in hours |
 | `scheduleAt` | `Date \| string` | When to send it; a string is `YYYY-MM-DD HH:MM:SS`, Romania time |
-| `callbackUrl` | `string` | Where Calisero posts the delivery status updates |
-| `sender` | `string` | One of your approved sender IDs; the default sender when omitted |
+| `callbackUrl` | `string` | Where Calisero posts the delivery status updates: a public http(s) address |
+| `sender` | `string` | One of your approved sender IDs, written exactly as approved; the default sender when omitted |
 | `shortenUrls` | `boolean` | Shorten the `http(s)://` links of the body |
+
+A `sender` that is unknown or not approved yet is refused with a `ValidationError` ("The sender is invalid or is not
+approved.") and nothing is sent. A `callbackUrl` must be an http or https address on the public Internet: private,
+loopback and link-local addresses are refused, and redirects are not followed.
 
 #### Shorten URLs
 
@@ -397,6 +401,9 @@ console.log(verification.expiresAt);
 // The code's SMS counts towards the account's daily sending limit
 console.log(response.responseMeta.dailyRemaining);
 ```
+
+The code is sent from a shared sender, so neither `brand` nor `template` may contain links (web addresses, domains,
+emails or IP addresses): the API refuses them with a `ValidationError`.
 
 #### Get Verification Details
 
@@ -526,6 +533,10 @@ app.post('/webhooks/calisero', createDeliveryWebhookHandler({ onMessage, token: 
 
 Then send the URL with the secret as each message's callback URL:
 `callbackUrl: 'https://yourapp.com/webhooks/calisero?token=' + process.env.CALISERO_WEBHOOK_TOKEN`.
+
+The callback URL must be reachable from the Internet: the API refuses private, loopback and link-local addresses
+(`localhost`, `192.168.x.x`…) and does not follow redirects. To receive callbacks on a development machine, expose the
+handler through a public tunnel and use its URL.
 
 | Answer | When |
 |---|---|
@@ -724,7 +735,7 @@ Every request names the library and its version, then the runtime, so Calisero c
 which version sent them:
 
 ```
-User-Agent: Calisero-SMS-Node/1.0.1 (Node.js v24.21.0; linux x64)
+User-Agent: Calisero-SMS-Node/1.0.2 (Node.js v24.21.0; linux x64)
 ```
 
 A request whose `User-Agent` starts with `Calisero-SMS-Node/` comes from this library. Give your application's name
@@ -734,7 +745,7 @@ with `appInfo` and it follows, so the requests of each of your applications can 
 const client = SmsClient.create(process.env.CALISERO_API_KEY, { appInfo: { name: 'MyShop', version: '2.1.0' } });
 
 console.log(client.httpClient.userAgent);
-// Calisero-SMS-Node/1.0.1 (Node.js v24.21.0; linux x64) MyShop/2.1.0
+// Calisero-SMS-Node/1.0.2 (Node.js v24.21.0; linux x64) MyShop/2.1.0
 ```
 
 Characters a header does not allow (spaces, diacritics…) become `-` in the name and the version.
