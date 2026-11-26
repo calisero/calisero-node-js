@@ -65,7 +65,8 @@ try {
     // verification.status === 'verified'
 } catch (error) {
     if (error instanceof ValidationError) {
-        // wrong or expired code, or too many attempts (422): error.message says which
+        // wrong, expired or already used code, or too many attempts (422): error.message says which.
+        // A code validates only once: a second validate() of the same code is refused.
     } else {
         throw error;
     }
@@ -143,6 +144,9 @@ the dashboard's Developers → Debug page shows everything that happened to that
 - **Sender ID**: alphanumeric, at most 11 characters, approved for the account and written exactly as approved;
   otherwise 422 and nothing is sent. Omit `sender` for the default sender. It cannot receive replies. Never take it
   from user input. OTP codes go out from the shared "Verify" sender and need no sender of your own.
+- **Links**: an account restricted to its approved link domains may link only to them, with or without `https://`;
+  any other link is refused with a `ValidationError` on `body` naming the domain, sandbox included. Domains are
+  requested in the dashboard (Messages › Link domains). Do not build message bodies with links to arbitrary domains.
 - **Scheduling**: the API reads `schedule_at` as `YYYY-MM-DD HH:MM:SS`, Romania time (Europe/Bucharest). Pass a
   `Date` and the library converts it; a string is sent as is and must already be in that format and time zone.
 - **Webhooks**: answer any 2xx within 2 seconds, do the work afterwards. Only a timeout or a failed connection is

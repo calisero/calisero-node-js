@@ -11,7 +11,9 @@ export interface CreateMessageRequest {
     readonly recipient: string;
 
     /**
-     * The text sent, at most 1600 characters.
+     * The text sent, at most 1600 characters. On an account restricted to its
+     * approved link domains, every link in it (with or without `https://`) must go to
+     * one of them; any other is refused with a `ValidationError` on `body`.
      */
     readonly body: string;
 
@@ -49,7 +51,8 @@ export interface CreateMessageRequest {
 
     /**
      * Replace the `http://` and `https://` links of the body with short ones, whose
-     * clicks are counted. The body is sent as written when omitted.
+     * clicks are counted. The body is sent as written when omitted, and for test
+     * messages (a sandbox account or API key), whose `shortenedUrls` stays empty.
      */
     readonly shortenUrls?: boolean | null | undefined;
 }

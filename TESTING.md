@@ -4,7 +4,7 @@ The library's tests live in `tests/` and run with [Vitest](https://vitest.dev). 
 the services run against a stub transport, and the HTTP layer and the webhook handler against a local HTTP server
 the tests start on `127.0.0.1`.
 
-As of 1.0.2 the suite has **390 tests in 22 files** and covers 100% of the lines, statements, functions and branches
+As of 1.0.3 the suite has **393 tests in 22 files** and covers 100% of the lines, statements, functions and branches
 of `src/`. CI fails below the thresholds set in `vitest.config.ts` (98% of the lines, statements and functions, 95% of
 the branches).
 
@@ -76,7 +76,7 @@ Each test answers with a stub transport (`tests/support/StubTransport.ts`) and c
 |---|---|---|
 | `MessageService.test.ts` | 21 | `create()` with every option, scheduled, with shortened links, its `responseMeta`, the daily limit and validation errors; `get()`, ids encoded, empty ids refused, unexpected answers; `list()` and its pages; `delete()` |
 | `OptOutService.test.ts` | 10 | `create()` with and without a reason, a duplicate; `get()`, `list()`, `update()`, `delete()`; invalid arguments |
-| `VerificationService.test.ts` | 13 | `list()` with the status filter; `create()` with a brand or a template, the daily limit; `get()`; `validate()` and each of its 422s, and its 404 |
+| `VerificationService.test.ts` | 14 | `list()` with the status filter; `create()` with a brand or a template, the daily limit; `get()`; `validate()` and each of its 422s, and its 404 |
 | `AccountService.test.ts` | 5 | `get()` for a typical account, a sandbox one without a daily limit; 401 and 403 |
 | `support.test.ts` | 5 | The services' helpers: reading answers, pages, ids and request objects |
 
@@ -96,7 +96,7 @@ Each test answers with a stub transport (`tests/support/StubTransport.ts`) and c
 
 | File | Tests | Covers |
 |---|---|---|
-| `openapi.test.ts` | 112 | The SDK against the API's OpenAPI document (`resources/openApi/api-v1.json`): every documented operation is implemented with its method, path and query; every documented example answer is read; every documented field of every resource is read; every documented request field can be sent, and nothing else; every documented error example maps to its error class with its message |
+| `openapi.test.ts` | 114 | The SDK against the API's OpenAPI document (`resources/openApi/api-v1.json`): every documented operation is implemented with its method, path and query; every documented example answer is read; every documented field of every resource is read; every documented request field can be sent, and nothing else; every documented error example maps to its error class with its message |
 
 When the API changes, replace `resources/openApi/api-v1.json` with the new document: the contract tests then show
 what the SDK lacks.

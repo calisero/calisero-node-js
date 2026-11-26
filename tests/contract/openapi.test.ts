@@ -176,7 +176,7 @@ const operations = Object.entries(spec.paths).flatMap(([path, methods]) =>
 
 describe('the OpenAPI document', () => {
     it('is the version this SDK was built for', () => {
-        expect(spec.info.version).toMatch(/^1\.0\.15\b/);
+        expect(spec.info.version).toMatch(/^1\.0\.17\b/);
         expect(spec.servers[0]?.url).toBe('https://rest.calisero.ro/api/v1');
     });
 

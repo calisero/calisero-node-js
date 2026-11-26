@@ -1,6 +1,6 @@
 {
     "name": "@calisero/calisero-node",
-    "version": "1.0.2",
+    "version": "1.0.3",
     "description": "Official Node.js library for the Calisero SMS API",
     "keywords": [
         "calisero",

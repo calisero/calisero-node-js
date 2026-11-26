@@ -139,6 +139,7 @@ describe('VerificationService.validate()', () => {
     it.each([
         'The validation code is incorrect.',
         'The validation code has expired.',
+        'The validation code has already been used.',
         'The maximum number of verification attempts has been exceeded.',
     ])('rejects with a ValidationError: %s', async (message) => {
         const { client } = clientAnswering(jsonResponse(422, { message, errors: { code: [message] } }));
