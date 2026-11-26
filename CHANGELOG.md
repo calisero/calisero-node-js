@@ -6,6 +6,21 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ## [Unreleased]
 
+## [1.0.3] - 2026-11-26
+
+Support for version 1.0.17 of the Calisero API, as documented on 18.11.2026. The API changed behaviours and documentation but no field or endpoint, so the library's code and API are unchanged; only the version in the `User-Agent` header moves to 1.0.3.
+
+### Added
+- **Approved link domains.** An account restricted to its approved link domains may link only to them in `body`: any other link is refused with a `ValidationError` on the `body` field, naming the domain. Documented in `README.md` ("Approved Link Domains"), `AGENTS.md` and the type declarations; the contract tests read the new example answer.
+
+### Changed
+- **A verification code validates only once.** `verifications.validate()` with a code already validated now rejects with a `ValidationError` ("The validation code has already been used.") instead of answering the verification again. The README, `AGENTS.md` and the type declarations no longer say that checking a verified code again succeeds.
+- `resources/openApi/api-v1.json` updated to the API's 1.0.17 document; the contract tests check the library against it, the new 422 answers of `POST /messages` (an unapproved `sender`) and of `PUT /verifications/validate` (a code already used) included.
+
+### Documentation
+- `README.md` and the type declarations: test messages, from a sandbox account or with a sandbox API key, keep their links as written even with `shortenUrls`, and return an empty `shortenedUrls`.
+- `README.md`: the API accepts HTTPS with TLS 1.2 or 1.3 only (Node.js uses them by default), and answers `http://` with a redirect, which the library does not follow: keep `baseUrl` on `https://`.
+
 ## [1.0.2] - 2026-10-25
 
 Support for version 1.0.15 of the Calisero API. The API added validation rules but no field or endpoint, so the library's code and API are unchanged; only the version in the `User-Agent` header moves to 1.0.2.

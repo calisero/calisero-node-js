@@ -300,7 +300,7 @@ console.log(response.responseMeta.dailyRemaining); // Messages left today (null:
 | Option | Type | Description |
 |---|---|---|
 | `recipient` | `string` | **Required.** Mobile number in E.164 format, e.g. `+40742123456` |
-| `body` | `string` | **Required.** The text, at most 1600 characters |
+| `body` | `string` | **Required.** The text, at most 1600 characters; its links must go to [approved domains](#approved-link-domains) when the account is restricted to them |
 | `visibleBody` | `string` | Shown instead of `body` in the API's answers and the dashboard |
 | `validity` | `number` | Validity period, in hours |
 | `scheduleAt` | `Date \| string` | When to send it; a string is `YYYY-MM-DD HH:MM:SS`, Romania time |
@@ -311,6 +311,31 @@ console.log(response.responseMeta.dailyRemaining); // Messages left today (null:
 A `sender` that is unknown or not approved yet is refused with a `ValidationError` ("The sender is invalid or is not
 approved.") and nothing is sent. A `callbackUrl` must be an http or https address on the public Internet: private,
 loopback and link-local addresses are refused, and redirects are not followed.
+
+#### Approved Link Domains
+
+An account restricted to its approved link domains may link only to them. Every link in `body`, with or without
+`https://` (`www.example.ro`, `example.ro/path`), must go to a domain approved for the account, exactly, or as one of
+its subdomains when they were approved too; links Calisero shortens are checked by the address they open. Any other
+link is refused with a `ValidationError` on the `body` field, whose message names the refused domain, and nothing is
+created or billed, sandbox included. Ask for a domain in the dashboard (Messages › Link domains).
+
+```js
+import { ValidationError } from '@calisero/calisero-node';
+
+try {
+    await client.messages.create({ recipient: '+40742***350', body: 'Track it: https://yourstore.com/orders/12345' });
+} catch (error) {
+    if (error instanceof ValidationError && error.validationErrors.body) {
+        console.log(error.validationErrors.body.join(' ')); // "Links to … are not allowed for this account: …"
+    } else {
+        throw error;
+    }
+}
+```
+
+A scheduled message whose domain is rejected or revoked before it is due is not sent: it fails with the error code
+1005.
 
 #### Shorten URLs
 
@@ -337,6 +362,9 @@ for (const link of later.shortenedUrls) {
     console.log(link.clickCount, link.lastClick); // Number of clicks, last click or null
 }
 ```
+
+Test messages, from a sandbox account or with a sandbox API key, keep their links as written: their `shortenedUrls`
+is empty.
 
 #### Get Message Details
 
@@ -436,11 +464,12 @@ const { data: verification } = await client.verifications.validate({
     code: 'ABC123',
 });
 
-console.log(verification.status); // 'verified' (checking a verified code again succeeds)
+console.log(verification.status); // 'verified'
 ```
 
-A wrong or expired code, or a sixth attempt, rejects with a `ValidationError` whose `validationErrors.code` says
-which; a phone number without a verification with a `NotFoundError`.
+A code validates only once. A wrong, expired or already used code, or a sixth attempt, rejects with a
+`ValidationError` whose `validationErrors.code` says which ("The validation code has already been used." for a second
+validation of the same code); a phone number without a verification with a `NotFoundError`.
 
 ### Opt-outs
 
@@ -729,13 +758,16 @@ Every request goes to `https://rest.calisero.ro/api/v1` with a 30-second timeout
 `Authorization: Bearer <key>`, `Accept: application/json`, `Content-Type: application/json` and the
 [`User-Agent`](#user-agent) below. Redirects are not followed, so the API key never goes to another host.
 
+The API accepts HTTPS with TLS 1.2 or 1.3 only, which Node.js uses by default. Keep `baseUrl` on `https://`: the API
+answers `http://` with a redirect, which the library does not follow and reports as an `ApiError`.
+
 ### User-Agent
 
 Every request names the library and its version, then the runtime, so Calisero can tell its requests apart and see
 which version sent them:
 
 ```
-User-Agent: Calisero-SMS-Node/1.0.2 (Node.js v24.21.0; linux x64)
+User-Agent: Calisero-SMS-Node/1.0.3 (Node.js v24.21.0; linux x64)
 ```
 
 A request whose `User-Agent` starts with `Calisero-SMS-Node/` comes from this library. Give your application's name
@@ -745,7 +777,7 @@ with `appInfo` and it follows, so the requests of each of your applications can 
 const client = SmsClient.create(process.env.CALISERO_API_KEY, { appInfo: { name: 'MyShop', version: '2.1.0' } });
 
 console.log(client.httpClient.userAgent);
-// Calisero-SMS-Node/1.0.2 (Node.js v24.21.0; linux x64) MyShop/2.1.0
+// Calisero-SMS-Node/1.0.3 (Node.js v24.21.0; linux x64) MyShop/2.1.0
 ```
 
 Characters a header does not allow (spaces, diacritics…) become `-` in the name and the version.

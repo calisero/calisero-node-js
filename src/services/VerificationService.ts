@@ -74,10 +74,10 @@ export class VerificationService {
     /**
      * Check a code against the latest verification of a phone number.
      *
-     * A wrong, expired or exhausted code (5 attempts) rejects with a
-     * {@link ValidationError} whose `validationErrors.code` says which; a phone
-     * number without a verification with a {@link NotFoundError}. Checking a
-     * verified code again succeeds.
+     * A code validates only once. A wrong, expired, already used or exhausted code
+     * (5 attempts) rejects with a {@link ValidationError} whose
+     * `validationErrors.code` says which; a phone number without a verification
+     * with a {@link NotFoundError}.
      */
     async validate(request: VerificationCheckRequest, options: RequestOptions = {}): Promise<GetVerificationResponse> {
         const payload = verificationCheckPayload(requestObject(request, 'verifications.validate()'));
